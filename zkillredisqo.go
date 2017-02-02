@@ -12,7 +12,7 @@ import (
 
 const (
 	// Version of zkillredisqo library
-	Version = "1.0.1"
+	Version = "1.0.2"
 	// DefaultUserAgent defines a user agent to use for HTTP requests if separate one is specified by the user
 	DefaultUserAgent = "zkillredisqo v" + Version + " - github.com/morpheusxaut/zkillredisqo"
 	// ZKillRedisQURL defines the URL of zKillboard's RedisQ service
