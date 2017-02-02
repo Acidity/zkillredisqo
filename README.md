@@ -19,7 +19,7 @@ go get -u github.com/MorpheusXAUT/zkillredisqo
 Usage
 ------
 
-A tiny sample application demonstrating the usage of zkillredisqo is included in the `cmd/simple.go`.
+A tiny sample app demonstrating the usage of zkillredisqo is included in `examples/simple.go`.
 In general, applications should create a `Poller` and receive messages from its `Kills` and `Errors` channels:
 
 ```go
