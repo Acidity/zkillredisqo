@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/morpheusxaut/zkillredisqo"
+	"github.com/MorpheusXAUT/zkillredisqo"
 	"log"
 	"os"
 )

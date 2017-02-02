@@ -13,7 +13,7 @@ Installation
 ------
 
 ```bash
-go get -u github.com/morpheusxaut/zkillredisqo
+go get -u github.com/MorpheusXAUT/zkillredisqo
 ```
 
 Usage
@@ -26,7 +26,7 @@ In general, applications should create a `Poller` and receive messages from its 
 package main
 
 import (
-	"github.com/morpheusxaut/zkillredisqo"
+	"github.com/MorpheusXAUT/zkillredisqo"
 	"log"
 )
 

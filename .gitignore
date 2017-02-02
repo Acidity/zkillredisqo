@@ -1,6 +1,6 @@
 .idea/
-cmd/*.json
-cmd/*.log
+examples/*.json
+examples/*.log
 
 # Created by .ignore support plugin (hsz.mobi)
 ### JetBrains template
