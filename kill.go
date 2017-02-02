@@ -5,19 +5,23 @@ import (
 	"time"
 )
 
+// Kill represents a kill as available on zKillboard
 type Kill struct {
 	KillPackage `json:"package"`
 }
 
+// IsNullKill checks whether a kill is an empty "null" kill
 func (k *Kill) IsNullKill() bool {
 	return k.KillID == 0
 }
 
+// KillPackage represents the "package" layer kills are wrap in by RedisQ
 type KillPackage struct {
 	KillID   int      `json:"killID"`
 	KillMail KillMail `json:"killmail"`
 }
 
+// KillMail stores the actual information about an EVE killmail
 type KillMail struct {
 	KillID        int                      `json:"killID"`
 	KillTime      KillMailTime             `json:"killTime"`
@@ -25,13 +29,18 @@ type KillMail struct {
 	Attackers     []KillMailAttacker       `json:"attackers"`
 	AttackerCount int                      `json:"attackerCount"`
 	Victim        KillMailVictim           `json:"victim"`
-	War           KillMailWar              `json:"war"`
+	War           struct {
+		ID   int    `json:"id"`
+		HRef string `json:"href"`
+	} `json:"war"`
 }
 
+// KillMailTime is used to allow for proper time parsing from JSON
 type KillMailTime struct {
 	time.Time
 }
 
+// UnmarshalJSON tries to parse a timestamp provided by RedisQ to a Go time type
 func (t *KillMailTime) UnmarshalJSON(buf []byte) error {
 	parsedTime, err := time.Parse("2006.01.02 15:04:05", strings.Trim(string(buf), `"`))
 	if err != nil {
@@ -42,6 +51,7 @@ func (t *KillMailTime) UnmarshalJSON(buf []byte) error {
 	return nil
 }
 
+// KillMailAttacker represents information about a single attacking party
 type KillMailAttacker struct {
 	Character      KillMailCommonAttributes `json:"character"`
 	Corporation    KillMailCommonAttributes `json:"corporation"`
@@ -54,6 +64,7 @@ type KillMailAttacker struct {
 	SecurityStatus float64                  `json:"securityStatus"`
 }
 
+// KillMailVictim represents information about the victim of a kill
 type KillMailVictim struct {
 	Character   KillMailCommonAttributes `json:"character"`
 	Corporation KillMailCommonAttributes `json:"corporation"`
@@ -69,6 +80,7 @@ type KillMailVictim struct {
 	}
 }
 
+// KillMailItem represents information about a single item included in a kill, either dropped or destroyed
 type KillMailItem struct {
 	ItemType          KillMailCommonAttributes `json:"itemType"`
 	QuantityDropped   int                      `json:"quantityDropped"`
@@ -77,11 +89,7 @@ type KillMailItem struct {
 	Singleton         int                      `json:"singleton"`
 }
 
-type KillMailWar struct {
-	ID   int    `json:"id"`
-	HRef string `json:"href"`
-}
-
+// KillMailCommonAttributes represents information being reused for multiple parts of a killmail such as corporations, characters or ship types
 type KillMailCommonAttributes struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`

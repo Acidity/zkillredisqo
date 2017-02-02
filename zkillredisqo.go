@@ -11,24 +11,38 @@ import (
 )
 
 const (
-	Version          = "1.0.0"
+	// Version of zkillredisqo library
+	Version = "1.0.0"
+	// DefaultUserAgent defines a user agent to use for HTTP requests if separate one is specified by the user
 	DefaultUserAgent = "zkillredisqo v" + Version + " - github.com/morpheusxaut/zkillredisqo"
-	ZKillRedisQURL   = "https://redisq.zkillboard.com/listen.php"
+	// ZKillRedisQURL defines the URL of zKillboard's RedisQ service
+	ZKillRedisQURL = "https://redisq.zkillboard.com/listen.php"
 )
 
+// Poller allows for polling of Kills from zKillboard's RedisQ service
 type Poller struct {
-	Kills  chan *Kill
+	// Kills will receive all parsed kills as they are received from zKillboard
+	Kills chan *Kill
+	// Errors will receive any error encountered while retrieving or parsing kills
 	Errors chan error
 
-	queueID     string
-	timeToWait  int
-	userAgent   string
+	// queueID can be used to identify an app to the RedisQ service (default empty)
+	queueID string
+	// timeToWait indicates how long RedisQ should wait before returning "null" kills if no new data is available
+	timeToWait int
+	// userAgent defines the user agent used for HTTP requests
+	userAgent string
+	// preparedURL stores the RedisQ URL and all optional parameters pre-parsed
 	preparedURL string
-	client      *http.Client
-	wg          *sync.WaitGroup
-	stop        bool
+	// client represents the HTTP client to use for requests
+	client *http.Client
+	// wg is used to allow for proper shutdown, allowing to wait for all requests to finish before exiting
+	wg *sync.WaitGroup
+	// stop indicates whether the polling loop should be stopped
+	stop bool
 }
 
+// NewPoller creates a new poller and starts the polling loop
 func NewPoller(client *http.Client) *Poller {
 	if client == nil {
 		client = &http.Client{
@@ -57,28 +71,34 @@ func NewPoller(client *http.Client) *Poller {
 	return p
 }
 
+// SetTimeToWait adjusts the timeToWait value passed to RedisQ
 func (p *Poller) SetTimeToWait(ttw int) {
 	p.timeToWait = ttw
 	p.prepareURL()
 }
 
+// SetUserAgent allows for a custom user agent to be configured
 func (p *Poller) SetUserAgent(ua string) {
 	p.userAgent = ua
 }
 
+// Stop notifies the poller to stop its loop after the next iteration
 func (p *Poller) Stop() {
 	p.stop = true
 }
 
+// Wait blocks until all requests have been finished
 func (p *Poller) Wait() {
 	p.wg.Wait()
 }
 
+// StopAndWait notifies the poller to stop and waits for all requests to finish
 func (p *Poller) StopAndWait() {
 	p.Stop()
 	p.Wait()
 }
 
+// poll retrieves kills from zKillboard's RedisQ until a stop is requested
 func (p *Poller) poll() {
 	defer p.wg.Done()
 
@@ -93,6 +113,7 @@ func (p *Poller) poll() {
 			continue
 		}
 		if kill.IsNullKill() {
+			// Silently ignore "null" kills and wait for next proper kill package
 			continue
 		}
 
@@ -100,6 +121,7 @@ func (p *Poller) poll() {
 	}
 }
 
+// retrieveKill tries fetching a kill from RedisQ and parsing the returned JSON
 func (p *Poller) retrieveKill() (*Kill, error) {
 	req, err := http.NewRequest("GET", p.preparedURL, nil)
 	if err != nil {
@@ -126,6 +148,7 @@ func (p *Poller) retrieveKill() (*Kill, error) {
 	return kill, nil
 }
 
+// prepareURL prepares the URL for requests to RedisQ and adds optional parameters as needed
 func (p *Poller) prepareURL() {
 	u, err := url.Parse(ZKillRedisQURL)
 	if err != nil {
@@ -142,5 +165,4 @@ func (p *Poller) prepareURL() {
 
 	u.RawQuery = q.Encode()
 	p.preparedURL = u.String()
-
 }
